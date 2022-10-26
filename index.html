@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T Download</title>
+    <link rel="icon" type="image/png" href="./img/logo.png" />
+
+    <!-- CSS only -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+
+    <!-- JavaScript Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"
+        crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="./simple-notify/simple-notify.min.css" />
+    <link rel="stylesheet" href="./fontawesome/css/all.css" />
+
+</head>
+
+<body>
+    <div class="text-center p-4">
+        <h1>GET AND DOWNLOAD IMAGE WITH URL FROM KIENKAKA.COM</h1>
+    </div>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-3 my-2"></div>
+            <div class="col-lg-6 text-center my-2">
+                <div class="input-group mb-3">
+                    <input type="search" class="form-control" id="url" name="url" placeholder="Nhập url..."
+                        aria-describedby="button-addon2">
+                    <button class="btn btn-primary" type="button" id="submit" onclick="handle()">Tìm</button>
+                </div>
+            </div>
+            <div class="col-lg-3 text-center my-2">
+                <button class="btn btn-success btn-icon-split" title="Download" onclick="create_zip()"
+                    id="download-btn">
+                    <span class="icon">
+                        <i class="fas fa-arrow-down"></i>
+                    </span>
+                    <span class="text">Download</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="row" id="image-list"></div>
+    </div>
+    <script src="./simple-notify/simple-notify.min.js"></script>
+    <script type="text/javascript" src="jszip/jszip.js"></script>
+    <script type="text/javascript" src="FileSaver.js"></script>
+    <script type="text/javascript" src="jszip/jszip-utils.min.js"></script>
+    <script type="text/javascript">
+        var imgLinks = [];
+        function isValidURL(string) {
+            var res = string.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
+            return (res !== null)
+        };
+        function handle() {
+            const urlString = document.getElementById('url');
+
+            const isURL = isValidURL(urlString.value);
+            if (!isURL) {
+                new Notify({
+                    status: 'warning',
+                    title: 'Warning',
+                    text: 'Địa chỉ không hợp lệ',
+                    autoclose: true,
+                    autotimeout: 2000,
+                    position: 'right top'
+                })
+                return false;
+            }
+
+            const url = new URL(urlString.value)
+            if (url.hostname != 'kienkaka.pro') {
+                new Notify({
+                    status: 'warning',
+                    title: 'Warning',
+                    text: 'Chỉ dùng địa chỉ từ website Kienkaka',
+                    autoclose: true,
+                    autotimeout: 2000,
+                    position: 'right top'
+                })
+                return false;
+            }
+            const htmlString = httpGet(url.href);
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlString, "text/html");
+
+            const scripts = doc.querySelector('body').getElementsByTagName("script")[0];
+            let arr = scripts.innerHTML.split('jQuery');
+            let arr1 = arr[0].split('=');
+            let obj = arr1[1].replace('[', '').replace(',]', '')
+            var reg = /{([\s\S]*?)},/
+            const strCopy = obj.split(reg);
+            let list = document.getElementById('image-list');
+            list.innerHTML = '';
+            imgLinks = [];
+            strCopy.forEach(item => {
+                if (item != "") {
+                    if (item.split(',')[1] != undefined) {
+                        var a = item.split(',')[1]
+                        var src = a.split(': ')[1].replaceAll('"', '')
+                        imgLinks.push(src);
+
+                        var img = document.createElement('img');
+                        img.className = "img-fluid"
+                        img.setAttribute('src', src);
+
+                        var a = document.createElement('a');
+                        a.setAttribute('href', src);
+                        a.setAttribute('target', "_blank");
+                        a.appendChild(img)
+
+                        var div = document.createElement('div');
+                        div.className = "col-lg-3 col-md-4 col-6 col-sm pb-3";
+                        div.appendChild(a)
+
+                        list.appendChild(div)
+                    }
+                }
+            }
+            );
+        }
+
+        function httpGet(theUrl) {
+            var xmlHttp = null;
+            xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("GET", theUrl, false);
+            xmlHttp.send(null);
+            return xmlHttp.responseText;
+        }
+
+        const create_zip = () => {
+            if (imgLinks.length <= 0) {
+                new Notify({
+                    status: 'warning',
+                    title: 'Warning',
+                    text: 'Chưa có hình ảnh',
+                    autoclose: true,
+                    autotimeout: 2000,
+                    position: 'right top'
+                })
+                return false;
+            }
+            const zip = new JSZip();
+            let count = 0;
+            imgLinks.forEach((photo, index) => {
+                JSZipUtils.getBinaryContent(photo, function (err, data) {
+                    zip.file("picture" + count + ".jpg", data, { binary: true });
+                    count++;
+                    if (count === imgLinks.length) {
+                        zip.generateAsync({ type: "blob" }).then(function (content) {
+                            saveAs(content, "save-photo.zip");
+                        });
+                    }
+                });
+            });
+        };
+    </script>
+</body>
+
+</html>
