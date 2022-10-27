@@ -28,9 +28,13 @@
             GET AND DOWNLOAD IMAGE WITH URL FROM
             <a href="https://kienkaka.pro/" style="text-decoration: none;" target="_blank">KIENKAKA.PRO</a>
         </h1>
-        <span>Nếu không load được ảnh, tải extension cho phép load ảnh </span><a
-            href="https://chrome.google.com/webstore/detail/allow-cors-access-control/lhobafahddgcelffkeicbaginigeejlf"
-            target="_blank">Tại đây</a><span> - </span><a href="huongdan.html">Hướng dẫn</a>
+        <span>Nếu không load được ảnh, tải extension cho phép load ảnh </span>
+        <a href="https://chrome.google.com/webstore/detail/allow-cors-access-control/lhobafahddgcelffkeicbaginigeejlf"
+            target="_blank">Tại đây</a>
+        <span> - </span>
+        <a href="huongdan.html">Hướng dẫn</a>
+        <a href="#" class="text-secondary ms-3 text-decoration-none fas fa-info-circle" data-bs-toggle="tooltip"
+            title="Trang web chỉ sự dụng 1 số trick để lấy được danh sách ảnh từ website: Kienkaka.pro và chỉ phụ vụ nhu cầu tải nhanh bộ sưu tập ảnh. Hoàn toàn không có mục đích chống phá hay thu lợi nhuận!"></a>
 
     </div>
     <div class="container">
@@ -56,11 +60,19 @@
 
         <div class="row" id="image-list"></div>
     </div>
+
     <script type="text/javascript" src="index.js"></script>
     <script src="./simple-notify/simple-notify.min.js"></script>
     <script type="text/javascript" src="jszip/jszip.js"></script>
     <script type="text/javascript" src="FileSaver.js"></script>
     <script type="text/javascript" src="jszip/jszip-utils.min.js"></script>
+    <script>
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    </script>
 </body>
 
 </html>
