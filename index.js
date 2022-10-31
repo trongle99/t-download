@@ -73,7 +73,13 @@ function httpGet(theUrl) {
     var xmlHttp = null;
     xmlHttp = new XMLHttpRequest();
     xmlHttp.open("GET", theUrl, false);
-    xmlHttp.send(null);
+    try {
+        xmlHttp.send(null); // Here a xmlhttprequestexception number 101 is thrown 
+    } catch (err) {
+        let content = document.getElementById("image-list");
+        content.innerHTML += "Lỗi Allow control allow origin, vui lòng tải extension hỗ trợ trước khi sử dụng ";
+        content.style.color = 'red';
+    }
     return xmlHttp.responseText;
 }
 
